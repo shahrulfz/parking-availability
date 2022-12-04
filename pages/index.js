@@ -8,90 +8,100 @@ export default function Home() {
   const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
-    setLoading(true)
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data)
-        let carparkDetails = data.items[0].carpark_data;
-        let allCarparkSmall = [];
-        let allCarparkMedium = [];
-        let allCarparkBig = [];
-        let allCarparkLarge = [];
-        for (let detail of carparkDetails) {
-          // Merge if same carpark have multiple lot_type
-          detail.sum_lot = 0;
-          detail.available_lot = 0;
-          detail.carpark_info.forEach(element => {
-            detail.sum_lot += +element.total_lots;
-            detail.available_lot += +element.lots_available;
-          });
+    const fetchData = () => {
+      setLoading(true)
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          let carparkDetails = data.items[0].carpark_data;
+          let allCarparkSmall = [];
+          let allCarparkMedium = [];
+          let allCarparkBig = [];
+          let allCarparkLarge = [];
+          for (let detail of carparkDetails) {
+            // Merge if same carpark have multiple lot_type
+            detail.sum_lot = 0;
+            detail.available_lot = 0;
+            detail.carpark_info.forEach(element => {
+              detail.sum_lot += +element.total_lots;
+              detail.available_lot += +element.lots_available;
+            });
 
-          if (detail.sum_lot < 100) {
-            allCarparkSmall.push(detail)
+            if (detail.sum_lot < 100) {
+              allCarparkSmall.push(detail)
+            }
+            else if (detail.sum_lot < 300) {
+              allCarparkMedium.push(detail)
+            }
+            else if (detail.sum_lot < 400) {
+              allCarparkBig.push(detail)
+            }
+            else {
+              allCarparkLarge.push(detail)
+            }
           }
-          else if (detail.sum_lot < 300) {
-            allCarparkMedium.push(detail)
+
+          const minAvailableSmall = Math.min(...allCarparkSmall.map(item => item.available_lot));
+          const maxAvailableSmall = Math.max(...allCarparkSmall.map(item => item.available_lot));
+          const getMinAvailableSmall = allCarparkSmall.filter(function (item) { return item.available_lot === minAvailableSmall; });
+          const getMaxAvailableSmall = allCarparkSmall.filter(function (item) { return item.available_lot === maxAvailableSmall; });
+
+          const minAvailableMedium = Math.min(...allCarparkMedium.map(item => item.available_lot));
+          const maxAvailableMedium = Math.max(...allCarparkMedium.map(item => item.available_lot));
+          const getMinAvailableMedium = allCarparkMedium.filter(function (item) { return item.available_lot === minAvailableMedium; });
+          const getMaxAvailableMedium = allCarparkMedium.filter(function (item) { return item.available_lot === maxAvailableMedium; });
+
+          const minAvailableBig = Math.min(...allCarparkBig.map(item => item.available_lot));
+          const maxAvailableBig = Math.max(...allCarparkBig.map(item => item.available_lot));
+          const getMinAvailableBig = allCarparkBig.filter(function (item) { return item.available_lot === minAvailableBig; });
+          const getMaxAvailableBig = allCarparkBig.filter(function (item) { return item.available_lot === maxAvailableBig; });
+
+          const minAvailableLarge = Math.min(...allCarparkLarge.map(item => item.available_lot));
+          const maxAvailableLarge = Math.max(...allCarparkLarge.map(item => item.available_lot));
+          const getMinAvailableLarge = allCarparkLarge.filter(function (item) { return item.available_lot === minAvailableLarge; });
+          const getMaxAvailableLarge = allCarparkLarge.filter(function (item) { return item.available_lot === maxAvailableLarge; });
+
+
+          const parkingCategoryData = {
+            small: {
+              highest_available: maxAvailableSmall,
+              highest_lots: getMaxAvailableSmall.map((item) => item.carpark_number).join(', '),
+              lowest_available: minAvailableSmall,
+              lowest_lots: getMinAvailableSmall.map((item) => item.carpark_number).join(', '),
+            },
+            medium: {
+              highest_available: maxAvailableMedium,
+              highest_lots: getMaxAvailableMedium.map((item) => item.carpark_number).join(', '),
+              lowest_available: minAvailableMedium,
+              lowest_lots: getMinAvailableMedium.map((item) => item.carpark_number).join(', '),
+            },
+            big: {
+              highest_available: maxAvailableBig,
+              highest_lots: getMaxAvailableBig.map((item) => item.carpark_number).join(', '),
+              lowest_available: minAvailableBig,
+              lowest_lots: getMinAvailableBig.map((item) => item.carpark_number).join(', '),
+            },
+            large: {
+              highest_available: maxAvailableLarge,
+              highest_lots: getMaxAvailableLarge.map((item) => item.carpark_number).join(', '),
+              lowest_available: minAvailableLarge,
+              lowest_lots: getMinAvailableLarge.map((item) => item.carpark_number).join(', '),
+            },
           }
-          else if (detail.sum_lot < 400) {
-            allCarparkBig.push(detail)
-          }
-          else {
-            allCarparkLarge.push(detail)
-          }
-        }
 
-        const minAvailableSmall = Math.min(...allCarparkSmall.map(item => item.available_lot));
-        const maxAvailableSmall = Math.max(...allCarparkSmall.map(item => item.available_lot));
-        const getMinAvailableSmall = allCarparkSmall.filter(function (item) { return item.available_lot === minAvailableSmall; });
-        const getMaxAvailableSmall = allCarparkSmall.filter(function (item) { return item.available_lot === maxAvailableSmall; });
+          setData(parkingCategoryData)
+          setLoading(false)
+        })
+    }
+    
+    setLoading(true);
+    fetchData();
 
-        const minAvailableMedium = Math.min(...allCarparkMedium.map(item => item.available_lot));
-        const maxAvailableMedium = Math.max(...allCarparkMedium.map(item => item.available_lot));
-        const getMinAvailableMedium = allCarparkMedium.filter(function (item) { return item.available_lot === minAvailableMedium; });
-        const getMaxAvailableMedium = allCarparkMedium.filter(function (item) { return item.available_lot === maxAvailableMedium; });
+    const interval = setInterval(() => {
+      fetchData()
+    }, 60000)
 
-        const minAvailableBig = Math.min(...allCarparkBig.map(item => item.available_lot));
-        const maxAvailableBig = Math.max(...allCarparkBig.map(item => item.available_lot));
-        const getMinAvailableBig = allCarparkBig.filter(function (item) { return item.available_lot === minAvailableBig; });
-        const getMaxAvailableBig = allCarparkBig.filter(function (item) { return item.available_lot === maxAvailableBig; });
-
-        const minAvailableLarge = Math.min(...allCarparkLarge.map(item => item.available_lot));
-        const maxAvailableLarge = Math.max(...allCarparkLarge.map(item => item.available_lot));
-        const getMinAvailableLarge = allCarparkLarge.filter(function (item) { return item.available_lot === minAvailableLarge; });
-        const getMaxAvailableLarge = allCarparkLarge.filter(function (item) { return item.available_lot === maxAvailableLarge; });
-
-
-        const parkingCategoryData = {
-          small: {
-            highest_available: maxAvailableSmall,
-            highest_lots: getMaxAvailableSmall.map((item) => item.carpark_number).join(', '),
-            lowest_available: minAvailableSmall,
-            lowest_lots: getMinAvailableSmall.map((item) => item.carpark_number).join(', '),
-          },
-          medium: {
-            highest_available: maxAvailableMedium,
-            highest_lots: getMaxAvailableMedium.map((item) => item.carpark_number).join(', '),
-            lowest_available: minAvailableMedium,
-            lowest_lots: getMinAvailableMedium.map((item) => item.carpark_number).join(', '),
-          },
-          big: {
-            highest_available: maxAvailableBig,
-            highest_lots: getMaxAvailableBig.map((item) => item.carpark_number).join(', '),
-            lowest_available: minAvailableBig,
-            lowest_lots: getMinAvailableBig.map((item) => item.carpark_number).join(', '),
-          },
-          large: {
-            highest_available: maxAvailableLarge,
-            highest_lots: getMaxAvailableLarge.map((item) => item.carpark_number).join(', '),
-            lowest_available: minAvailableLarge,
-            lowest_lots: getMinAvailableLarge.map((item) => item.carpark_number).join(', '),
-          },
-        }
-        console.log(parkingCategoryData)
-        setData(parkingCategoryData)
-        setLoading(false)
-      })
+    return () => clearInterval(interval)
   }, [])
 
   return (
