@@ -1,6 +1,6 @@
 ## Getting Started
 
-Click [https://currency-challenge.vercel.app/](https://currency-challenge.vercel.app/) with your browser to see the result.
+Click [https://parking-availability.vercel.app/](https://parking-availability.vercel.app/) with your browser to see the result.
 
 For developer:
 
